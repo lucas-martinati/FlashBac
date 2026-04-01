@@ -1,10 +1,34 @@
-document.addEventListener('DOMContentLoaded', () => {
+// === CONFIGURATION REVENUECAT ===
+const RC_API_KEY = 'rcb_sb_bcbThitJrjzDQsZUsoELLDjnE';
+
+let rcPurchases = null;
+
+async function initRevenueCat() {
+    try {
+        const RC = window.Purchases;
+        if (!RC) {
+            console.error('RevenueCat SDK non chargé');
+            return;
+        }
+        const appUserId = RC.Purchases.generateRevenueCatAnonymousAppUserId();
+        rcPurchases = RC.Purchases.configure({
+            apiKey: RC_API_KEY,
+            appUserId: appUserId,
+        });
+    } catch (e) {
+        console.error('Erreur init RevenueCat:', e);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+    await initRevenueCat();
 
     // --- Génération des deux sections ---
     createDeckElements(decksDataTerminale, 'decks-list-terminale', 't');
     createDeckElements(decksDataPremiere, 'decks-list-premiere', 'p');
 
-    // --- Gestion de l'événement pour dérouler les chapitres (fonctionne pour toute la page) ---
+    // --- Gestion de l'événement pour dérouler les chapitres ---
     document.body.addEventListener('click', (event) => {
         if (event.target.classList.contains('btn-toggle-chapters')) {
             const button = event.target;
@@ -20,84 +44,99 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- Logique du Modal d'Achat ---
-    const modalOverlay = document.getElementById('purchase-modal');
-    const purchaseForm = document.getElementById('purchase-form');
-    const closeBtn = document.querySelector('.modal-close-btn');
-    const deckNameInput = document.getElementById('form-deck-name');
-    const deckPriceInput = document.getElementById('form-deck-price');
+    // --- Logique du Modal de Succès ---
+    const successModal = document.getElementById('success-modal');
+    const successCloseBtn = document.getElementById('success-close-btn');
 
-    if (modalOverlay) {
-        const openModal = (deckName, deckPrice) => {
-            deckNameInput.value = deckName;
-            deckPriceInput.value = deckPrice;
-            modalOverlay.style.display = 'flex';
-            setTimeout(() => modalOverlay.classList.add('active'), 10);
-        };
+    const closeSuccessModal = () => {
+        successModal.classList.remove('active');
+        setTimeout(() => successModal.style.display = 'none', 300);
+    };
 
-        const closeModal = () => {
-            modalOverlay.classList.remove('active');
-            setTimeout(() => modalOverlay.style.display = 'none', 300);
-        };
-
-        document.body.addEventListener('click', (event) => {
-            const purchaseBtn = event.target.closest('.btn-purchase');
-            if (purchaseBtn) {
-                const deckName = purchaseBtn.dataset.deckName;
-                const deckPrice = purchaseBtn.dataset.deckPrice;
-                openModal(deckName, deckPrice);
-            }
-        });
-
-        closeBtn.addEventListener('click', closeModal);
-        modalOverlay.addEventListener('click', (event) => {
-            if (event.target === modalOverlay) {
-                closeModal();
-            }
-        });
-
-        purchaseForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const submitButton = purchaseForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.textContent = 'Envoi en cours...';
-
-            const scriptURL = 'https://script.google.com/macros/s/AKfycbxVx_qVHq8CjXr8Gre5cl-IMUv3kk0ojgxHEozOvS5Pk59XEP_qtgM8sKeTpLZFBeE5nA/exec';
-
-            const formData = new FormData(purchaseForm);
-            const priceWithComma = formData.get('price');
-            const priceWithDot = priceWithComma.replace(',', '.');
-            formData.set('price', priceWithDot);
-
-            fetch(scriptURL, { method: 'POST', body: formData })
-                .then(response => {
-                    const modalContent = document.querySelector('.modal-content');
-
-                    modalContent.innerHTML = `
-                        <h3>Merci !</h3>
-                        <p>Votre demande a été enregistrée. Cliquez sur le bouton ci-dessous pour finaliser votre commande.</p>
-                        <a href="https://www.paypal.me/LucasM54/${priceWithDot}" target="_blank" class="btn btn-primary btn-paypal">
-                            Payer ${priceWithDot}€ avec PayPal
-                        </a>
-                        <p style="margin-top: 20px; font-size: 0.9rem;">Vous recevrez l'accès par email après confirmation du paiement.</p>
-                        <button class="btn btn-secondary" onclick="location.reload()" style="margin-top:10px;">Fermer</button>
-                    `;
-                })
-                .catch(error => {
-                    console.error('Error!', error.message);
-                    const modalContent = document.querySelector('.modal-content');
-                    modalContent.innerHTML = `
-                        <h3>Erreur</h3>
-                        <p>Une erreur est survenue. Veuillez réessayer ou me contacter directement.</p>
-                        <button class="btn btn-secondary" onclick="location.reload()">Fermer</button>
-                    `;
-                });
+    if (successCloseBtn) {
+        successCloseBtn.addEventListener('click', closeSuccessModal);
+    }
+    if (successModal) {
+        successModal.addEventListener('click', (event) => {
+            if (event.target === successModal) closeSuccessModal();
         });
     }
 
-    // --- Effet 3D Hero Image (Individual Cards) ---
+    const showSuccessModal = () => {
+        successModal.style.display = 'flex';
+        setTimeout(() => successModal.classList.add('active'), 10);
+    };
+
+    // --- Achat via RevenueCat ---
+    document.body.addEventListener('click', async (event) => {
+        const purchaseBtn = event.target.closest('.btn-purchase');
+        if (!purchaseBtn) return;
+
+        const productId = purchaseBtn.dataset.productId;
+        if (!productId) {
+            alert('Produit non configuré.');
+            return;
+        }
+
+        if (!rcPurchases) {
+            alert('Le système de paiement n\'est pas encore prêt. Veuillez réessayer.');
+            return;
+        }
+
+        purchaseBtn.disabled = true;
+        const originalText = purchaseBtn.textContent;
+        purchaseBtn.textContent = 'Chargement...';
+
+        try {
+            // Récupérer l'offre disponible
+            const offerings = await rcPurchases.getOfferings();
+            if (!offerings.current || !offerings.current.availablePackages.length) {
+                throw new Error('Aucune offre disponible');
+            }
+
+            // Trouver le package correspondant au produit
+            let targetPackage = offerings.current.availablePackages.find(
+                p => p.webBillingProduct && p.webBillingProduct.identifier === productId
+            );
+
+            // Si pas trouvé dans les packages, chercher dans toutes les offerings
+            if (!targetPackage) {
+                for (const key of Object.keys(offerings.all)) {
+                    const offering = offerings.all[key];
+                    targetPackage = offering.availablePackages.find(
+                        p => p.webBillingProduct && p.webBillingProduct.identifier === productId
+                    );
+                    if (targetPackage) break;
+                }
+            }
+
+            if (!targetPackage) {
+                throw new Error('Produit non trouvé dans les offres');
+            }
+
+            // Lancer l'achat
+            await rcPurchases.purchase({ rcPackage: targetPackage });
+
+            // Afficher le modal de succès
+            showSuccessModal();
+
+        } catch (error) {
+            const RC = window.Purchases;
+            if (RC && error instanceof RC.PurchasesError && error.errorCode === RC.ErrorCode.UserCancelledError) {
+                // L'utilisateur a annulé, pas d'erreur
+            } else {
+                console.error('Erreur d\'achat:', error);
+                alert('Une erreur est survenue lors du paiement. Veuillez réessayer.');
+            }
+        } finally {
+            purchaseBtn.disabled = false;
+            purchaseBtn.textContent = originalText;
+        }
+    });
+
+    // --- Effet 3D Hero Image ---
     const heroCards = document.querySelectorAll('.hero-card');
-    const maxRotate = 8; // A bit more subtle for individual cards
+    const maxRotate = 8;
 
     heroCards.forEach(card => {
         card.addEventListener('mousemove', (e) => {

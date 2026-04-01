@@ -383,19 +383,9 @@ body::before {
     box-shadow: 0 0 10px var(--glow-color);
 }
 
-.btn-paypal {
-    display: inline-block;
-    margin: 20px 0;
-    background-color: #0070ba; /* Couleur officielle PayPal */
-    border-color: #0070ba;
-    color: #fff;
-    width: 100%;
-}
-
-.btn-paypal:hover {
-    background-color: #005ea6;
-    border-color: #005ea6;
-    box-shadow: 0 0 15px #0070ba;
+/* --- Modal Succès --- */
+.modal-success p {
+    margin-bottom: 15px;
 }
 
 /* --- Séparateur et Disclaimer --- */

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flashcards pour le Lycée - Réussissez votre Bac</title>
+    <title>FlashBac - Flashcards pour le Lycée & le Bac</title>
     <link rel="icon" href="img/icon.png">
     <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +14,7 @@
 
     <header class="main-header">
         <div class="container">
-            <h1>Flashcards de Première & Terminale</h1>
+            <h1>FlashBac</h1>
         </div>
     </header>
 
@@ -54,7 +54,7 @@
 
         <div class="info-studysmarter">
             <div class="container">
-                <p><strong>Important :</strong> Nos flashcards sont hébergées sur la plateforme <a href="https://www.studysmarter.fr/" target="_blank" rel="noopener noreferrer">StudySmarter</a>. La création d'un compte <strong>gratuit</strong> est nécessaire pour y accéder après l'achat.</p>
+                <p><strong>Important :</strong> Nos flashcards sont hébergées sur la plateforme <a href="https://www.studysmarter.fr/" target="_blank" rel="noopener noreferrer">StudySmarter</a>. La création d'un compte <strong>gratuit</strong> est nécessaire pour y accéder après l'achat. Après paiement, vous recevrez vos liens d'accès par email.</p>
             </div>
         </div>
 
@@ -84,36 +84,21 @@
 
     <footer class="main-footer">
         <div class="container">
-            <p>&copy; 2024 Vos Flashcards. Tous droits réservés.</p>
+            <p>&copy; 2024 FlashBac. Tous droits réservés.</p>
         </div>
     </footer>
 
+    <script src="https://unpkg.com/@revenuecat/purchases-js@latest/dist/Purchases.umd.js"></script>
     <script src="js/data.js"></script>
     <script src="js/main.js"></script>
 
-    <!-- Modal Formulaire d'Achat -->
-    <div id="purchase-modal" class="modal-overlay">
-        <div class="modal-content">
+    <!-- Modal Succès Achat -->
+    <div id="success-modal" class="modal-overlay">
+        <div class="modal-content modal-success">
             <button class="modal-close-btn">&times;</button>
-            <h3>Finaliser la commande</h3>
-            <p>Veuillez remplir ce formulaire pour recevoir vos flashcards. Le paiement se fait manuellement via PayPal.</p>
-            <form id="purchase-form">
-                <input type="hidden" id="form-deck-name" name="deckName">
-                <input type="hidden" id="form-deck-price" name="price">
-                <div class="form-group">
-                    <label for="name">Nom & Prénom</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
-                </div>
-                <div class="form-group">
-                    <label for="paypal-id">Identifiant PayPal</label>
-                    <input type="text" id="paypal-id" name="paypalId" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-paypal">Envoyer et voir les infos de paiement</button>
-            </form>
+            <h3>Paiement réussi !</h3>
+            <p>Un email avec vos liens d'accès vient de vous être envoyé. Pensez à vérifier vos spams.</p>
+            <button class="btn btn-secondary" id="success-close-btn" style="margin-top:20px; width:100%;">Fermer</button>
         </div>
     </div>
 </body>

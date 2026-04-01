@@ -7,6 +7,7 @@ const decksDataTerminale = [
         name: "Physique-Chimie - Terminale",
         price: "14,99",
         cardCount: 213,
+        productId: "physique_terminale",
         features: ["Flashcards", "Les 22 démonstrations exigibles au BAC", "Cours numérique rigoureux"],
         chapters: [
             "Rappels de première",
@@ -35,6 +36,7 @@ const decksDataTerminale = [
         name: "Mathématiques - Terminale",
         price: "14,99",
         cardCount: 180,
+        productId: "math_terminale",
         features: ["Flashcards", "Les 16 démonstrations exigibles au BAC", "Cours numérique rigoureux"],
         chapters: [
             "Rappels de première",
@@ -63,6 +65,7 @@ const decksDataTerminale = [
         name: "Maths Expertes - Terminale",
         price: "7,99",
         cardCount: 47,
+        productId: "math_expertes",
         features: ["Flashcards", "Cours numérique rigoureux"],
         chapters: [
             "Symboles mathématiques",
@@ -77,6 +80,7 @@ const decksDataTerminale = [
         name: "Histoire - Terminale",
         price: "4,99",
         cardCount: 80,
+        productId: "histoire_terminale",
         features: ["Flashcards", "Cours numérique rigoureux"],
         chapters: [
             "L'impact de la crise de 1929 : déséquilibres économiques et sociaux",
@@ -190,7 +194,7 @@ function createDeckElements(decks, containerId, idPrefix) {
                 </div>
                 <div class="deck-actions">
                     <button class="btn btn-secondary btn-toggle-chapters" data-deck-id="${deckId}" ${deck.isUnderConstruction ? 'disabled' : ''}>Voir les chapitres</button>
-                    <button class="btn btn-primary btn-purchase" data-deck-name="${deck.name}" data-deck-price="${deck.price}" ${deck.isUnderConstruction ? 'disabled' : ''}>🛒 Acheter - ${deck.price}€</button>
+                    <button class="btn btn-primary btn-purchase" data-deck-name="${deck.name}" data-deck-price="${deck.price}" data-product-id="${deck.productId || ''}" ${deck.isUnderConstruction ? 'disabled' : ''}>🛒 Acheter - ${deck.price}€</button>
                 </div>
             </div>
             ${featuresHTML}
