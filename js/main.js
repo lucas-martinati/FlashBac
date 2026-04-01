@@ -10,8 +10,17 @@ async function initRevenueCat() {
             console.error('RevenueCat SDK non chargé');
             return;
         }
-        const appUserId = RC.Purchases.generateRevenueCatAnonymousAppUserId();
-        rcPurchases = RC.Purchases.configure({
+        
+        // Détection intelligente du bon objet (cas window.Purchases ou window.Purchases.Purchases)
+        const SDK = RC.Purchases ? RC.Purchases : RC;
+        
+        if (typeof SDK.configure !== 'function') {
+            console.error('RevenueCat SDK chargé mais structure configure non trouvée');
+            return;
+        }
+
+        const appUserId = SDK.generateRevenueCatAnonymousAppUserId();
+        rcPurchases = SDK.configure({
             apiKey: RC_API_KEY,
             appUserId: appUserId,
         });
