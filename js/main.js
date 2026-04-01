@@ -1,5 +1,5 @@
 // === CONFIGURATION REVENUECAT ===
-const RC_API_KEY = 'rcb_sb_bcbThitJrjzDQsZUsoELLDjnE';
+const RC_API_KEY = 'rcb_parWrLVMVqfOqyqUabVHYlIvsqOX';
 
 let rcPurchases = null;
 
